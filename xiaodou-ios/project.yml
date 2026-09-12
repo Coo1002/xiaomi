@@ -13,6 +13,7 @@ targets:
       - path: 小咪App
     info:
       path: 小咪App/Info.plist
+    scheme: {}
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.yourname.xiaomi.app
@@ -27,15 +28,6 @@ targets:
     dependencies:
       - target: 小咪LiveActivity
         embed: true
-
-schemes:
-  小咪:
-    build:
-      targets:
-        小咪: all
-        小咪LiveActivity: [archive]
-    archive:
-      config: Release
 
   小咪LiveActivity:
     type: app-extension
