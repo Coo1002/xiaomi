@@ -1,0 +1,50 @@
+name: build-ipa
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 XcodeGen
+        run: brew install xcodegen
+
+      - name: 生成 Xcode 工程
+        run: xcodegen generate
+
+      - name: 编译（未签名归档）
+        run: |
+          set -e
+          xcodebuild \
+            -project 小咪.xcodeproj \
+            -scheme 小咪 \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/小咪.xcarchive \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            -quiet
+
+      - name: 打包成 .ipa
+        run: |
+          set -e
+          mkdir -p Payload
+          cp -R build/小咪.xcarchive/Products/Applications/小咪.app Payload/
+          zip -r 小咪.ipa Payload -x "*.DS_Store"
+          ls -la 小咪.ipa
+
+      - name: 上传 .ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: xiaomi-ipa
+          path: 小咪.ipa
+          if-no-files-found: error
